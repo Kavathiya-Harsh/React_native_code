@@ -241,3 +241,112 @@ npx expo start
 ```text
 LocationScreen.jsx
 ```
+
+## Get Location Parameters & divert to google map 
+
+
+```jsx
+
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Button,
+  StyleSheet,
+  Linking,
+} from "react-native";
+
+import * as Location from "expo-location";
+
+export default function LocationScreen() {
+  const [location, setLocation] = useState(null);
+
+  const getCurrentLocation = async () => {
+    const { granted } =
+      await Location.requestForegroundPermissionsAsync();
+
+    if (!granted) {
+      alert("Location Permission Denied");
+      return;
+    }
+
+    const currentLocation =
+      await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Highest,
+      });
+
+    setLocation(currentLocation);
+
+    console.log(currentLocation);
+  };
+
+  const openGoogleMaps = () => {
+    if (!location) {
+      alert("First get your location");
+      return;
+    }
+
+    const latitude = location.coords.latitude;
+    const longitude = location.coords.longitude;
+
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+    Linking.openURL(url);
+  };
+
+  return (
+    <View style={styles.container}>
+
+      <Button
+        title="GET CURRENT LOCATION"
+        onPress={getCurrentLocation}
+      />
+
+      {location && (
+        <View style={styles.info}>
+          <Text>
+            Accuracy: {location.coords.accuracy}
+          </Text>
+
+          <Text>
+            Latitude: {location.coords.latitude}
+          </Text>
+
+          <Text>
+            Longitude: {location.coords.longitude}
+          </Text>
+        </View>
+      )}
+
+      <View style={styles.space} />
+
+      <Button
+        title="OPEN IN GOOGLE MAPS"
+        onPress={openGoogleMaps}
+      />
+
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+  },
+
+  info: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    elevation: 3,
+  },
+
+  space: {
+    height: 20,
+  },
+});
+
+```
